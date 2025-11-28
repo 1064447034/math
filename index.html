@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 适配微信手机端 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>10以内加减法练习</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "微软雅黑", Arial, sans-serif;
+        }
+        body {
+            background-color: #f9f9f9;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        /* 标题样式 */
+        .title {
+            font-size: 28px;
+            color: #e63946;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        /* 题目容器 */
+        .question-box {
+            background-color: #fff;
+            padding: 30px 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+            margin-bottom: 30px;
+        }
+        .question {
+            font-size: 36px;
+            font-weight: bold;
+            color: #2a9d8f;
+            margin-bottom: 20px;
+        }
+        .feedback {
+            font-size: 24px;
+            font-weight: bold;
+            height: 30px;
+            margin-bottom: 10px;
+        }
+        .correct {
+            color: #26a69a;
+        }
+        .wrong {
+            color: #e63946;
+        }
+        /* 选项容器 */
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
+            max-width: 400px;
+            margin-bottom: 30px;
+        }
+        .option-btn {
+            padding: 20px 0;
+            font-size: 28px;
+            border: none;
+            border-radius: 10px;
+            background-color: #457b9d;
+            color: #fff;
+            cursor: pointer;
+            touch-action: manipulation; /* 优化手机触控 */
+        }
+        .option-btn:hover, .option-btn:active {
+            background-color: #1d3557;
+        }
+        /* 下一题按钮 */
+        .next-btn {
+            padding: 15px 40px;
+            font-size: 24px;
+            border: none;
+            border-radius: 10px;
+            background-color: #e63946;
+            color: #fff;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        .next-btn:hover, .next-btn:active {
+            background-color: #c1121f;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="title">宝贝的加减法练习</h1>
+    <div class="question-box">
+        <div class="question" id="question"></div>
+        <div class="feedback" id="feedback"></div>
+    </div>
+    <div class="options" id="options"></div>
+    <button class="next-btn" id="nextBtn">下一题</button>
+
+    <script>
+        // 获取DOM元素
+        const questionEl = document.getElementById('question');
+        const feedbackEl = document.getElementById('feedback');
+        const optionsEl = document.getElementById('options');
+        const nextBtn = document.getElementById('nextBtn');
+
+        // 全局变量存储当前题目信息
+        let currentAnswer = 0;
+
+        // 生成10以内的随机数
+        function getRandomNum(max) {
+            return Math.floor(Math.random() * (max + 1));
+        }
+
+        // 生成题目和选项
+        function generateQuestion() {
+            // 重置反馈
+            feedbackEl.textContent = '';
+            feedbackEl.className = 'feedback';
+            // 清空选项
+            optionsEl.innerHTML = '';
+
+            // 随机生成两个数字和运算符（减法保证结果非负）
+            let num1, num2, operator, answer;
+            const isAdd = Math.random() > 0.5; // 50%概率加法/减法
+
+            if (isAdd) {
+                operator = '+';
+                num1 = getRandomNum(10);
+                num2 = getRandomNum(10 - num1); // 保证和≤10
+                answer = num1 + num2;
+            } else {
+                operator = '-';
+                num1 = getRandomNum(10);
+                num2 = getRandomNum(num1); // 保证差≥0
+                answer = num1 - num2;
+            }
+
+            // 存储正确答案
+            currentAnswer = answer;
+
+            // 显示题目
+            questionEl.textContent = `${num1} ${operator} ${num2} = ?`;
+
+            // 生成4个选项（1个正确+3个干扰项）
+            const options = [answer];
+            while (options.length < 4) {
+                const fakeNum = getRandomNum(10);
+                // 避免重复选项
+                if (!options.includes(fakeNum)) {
+                    options.push(fakeNum);
+                }
+            }
+
+            // 乱序选项
+            options.sort(() => Math.random() - 0.5);
+
+            // 生成选项按钮
+            options.forEach(option => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = option;
+                btn.addEventListener('click', () => checkAnswer(option));
+                optionsEl.appendChild(btn);
+            });
+        }
+
+        // 检查答案
+        function checkAnswer(selected) {
+            if (selected === currentAnswer) {
+                // 正确反馈
+                feedbackEl.textContent = '正确！👍';
+                feedbackEl.className = 'feedback correct';
+                // 禁用所有选项（防止重复点击）
+                document.querySelectorAll('.option-btn').forEach(btn => {
+                    btn.disabled = true;
+                });
+            } else {
+                // 错误反馈
+                feedbackEl.textContent = '错误，重试！👎';
+                feedbackEl.className = 'feedback wrong';
+            }
+        }
+
+        // 下一题按钮绑定事件
+        nextBtn.addEventListener('click', generateQuestion);
+
+        // 页面加载时生成第一题
+        window.onload = generateQuestion;
+    </script>
+</body>
+</html>
